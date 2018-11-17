@@ -40,9 +40,11 @@
   </PropertyGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Program.cs" />
+    <Compile Include="SimpleLog.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
