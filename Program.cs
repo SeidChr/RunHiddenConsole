@@ -32,8 +32,9 @@
 
             var startInfo = new ProcessStartInfo
             {
-                ////CreateNoWindow = true,
-                ////UseShellExecute = false,
+                CreateNoWindow = true,
+                UseShellExecute = false,
+                RedirectStandardInput = true,
                 WindowStyle = ProcessWindowStyle.Hidden,
                 WorkingDirectory = Directory.GetCurrentDirectory(),
                 Arguments = string.Join(" ", args),
@@ -49,11 +50,10 @@
                     return -7002;
                 }
 
-                if (!proc.WaitForExit(60000))
-                {
-                    SimpleLog.Error("Process didn't close within 60s. Killing.");
-                    proc.Kill();
-                }
+                // process will close as soon as its waiting for interactive input.
+                proc.StandardInput.Close();
+
+                proc.WaitForExit();
 
                 return proc.ExitCode;
             }
