@@ -1,12 +1,11 @@
-﻿using System.ComponentModel;
-using System.Reflection;
-using System.Text.RegularExpressions;
-
-namespace PowerShellWindowHost
+﻿namespace PowerShellWindowHost
 {
     using System;
+    using System.ComponentModel;
     using System.Diagnostics;
     using System.IO;
+    using System.Reflection;
+    using System.Text.RegularExpressions;
 
     public static class Program
     {
