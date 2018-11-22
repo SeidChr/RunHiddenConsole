@@ -8,27 +8,27 @@
 
     public static class Program
     {
-        public static int Main(string[] args)
+        public static int Main()
         {
-            var executingAssembly = Assembly.GetExecutingAssembly();
+            Debugger.Launch();
 
-            var fullName = Path.GetFileName(executingAssembly.Location);
+            var arguments = GetArguments();
 
-            SimpleLog.Prefix = $"{fullName}.";
+            GetAssemblyData(out var executingAssemblyFileName, out var executingAssemblyLocation);
 
-            SimpleLog.Info($"RunHiddenConsole Executing Assembly FullName: {fullName}");
+            SimpleLog.Prefix = $"{executingAssemblyFileName}.";
 
-            var match = Regex.Match(fullName, @"(.+)w(\.\w{1,3})");
-            if (!match.Success)
+            SimpleLog.Info($"Full Commandline: {Environment.CommandLine}");
+            SimpleLog.Info($"Detected Attributes: {arguments}");
+
+            SimpleLog.Info($"RunHiddenConsole Executing Assembly FullName: {executingAssemblyFileName}");
+
+            var targetExecutablePath = GetTargetExecutablePath(executingAssemblyFileName, executingAssemblyLocation);
+            if (targetExecutablePath == null)
             {
                 SimpleLog.Error("Unable to find target executable name in own executable name.");
                 return -7001;
             }
-
-            var targetExecutableName = match.Groups[1].Value + match.Groups[2].Value;
-
-            var fullDirectory = Path.GetDirectoryName(executingAssembly.Location) ?? string.Empty;
-            var executable = Path.Combine(fullDirectory, targetExecutableName);
 
             var startInfo = new ProcessStartInfo
             {
@@ -37,8 +37,8 @@
                 RedirectStandardInput = true,
                 WindowStyle = ProcessWindowStyle.Hidden,
                 WorkingDirectory = Directory.GetCurrentDirectory(),
-                Arguments = string.Join(" ", args),
-                FileName = executable,
+                Arguments = arguments,
+                FileName = targetExecutablePath,
             };
 
             try
@@ -62,6 +62,43 @@
                 SimpleLog.Error("Starting target process threw an unknown Exception: " + ex);
                 return -7003;
             }
+        }
+
+        private static void GetAssemblyData(out string assemblyLocation, out string assemblyFileName)
+        {
+            var executingAssembly = Assembly.GetExecutingAssembly();
+            assemblyFileName = Path.GetFileName(executingAssembly.Location);
+            assemblyLocation = Path.GetDirectoryName(executingAssembly.Location) ?? string.Empty;
+        }
+
+        private static string GetTargetExecutablePath(string executingAssemblyFileName, string executingAssemblyLocation)
+        {
+            var match = Regex.Match(executingAssemblyFileName, @"(.+)w(\.\w{1,3})");
+            if (!match.Success)
+            {
+                return null;
+            }
+
+            var targetExecutableName = match.Groups[1].Value + match.Groups[2].Value;
+            var targetExecutablePath = Path.Combine(executingAssemblyLocation, targetExecutableName);
+
+            return targetExecutablePath;
+        }
+
+        private static string GetArguments()
+        {
+            var commandLineExecutable = Environment.GetCommandLineArgs()[0];
+            var commandLine = Environment.CommandLine;
+
+            var arguments = commandLine
+                .Remove(
+                    commandLine.IndexOf(
+                        commandLineExecutable,
+                        StringComparison.InvariantCultureIgnoreCase),
+                    commandLineExecutable.Length)
+                .TrimStart('"', ' ');
+
+            return arguments;
         }
     }
 }
