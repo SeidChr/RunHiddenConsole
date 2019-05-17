@@ -14,6 +14,13 @@
 
             var fullName = Path.GetFileName(executingAssembly.Location);
 
+            var settingsReader = new System.Configuration.AppSettingsReader();
+            var logLevelString = settingsReader.GetValue("LogLevel", typeof(string)).ToString();
+            if (Enum.TryParse(logLevelString, true, out SimpleLog.Severity logLevel))
+            {
+                SimpleLog.LogLevel = logLevel;
+            }
+
             SimpleLog.Prefix = $"{fullName}.";
 
             SimpleLog.Info($"RunHiddenConsole Executing Assembly FullName: {fullName}");
@@ -60,6 +67,7 @@
             catch (Exception ex)
             {
                 SimpleLog.Error("Starting target process threw an unknown Exception: " + ex);
+                SimpleLog.Log(ex);
                 return -7003;
             }
         }
