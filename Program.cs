@@ -17,6 +17,14 @@
             var arguments = GetArguments();
 
             GetAssemblyData(out var executingAssemblyFileName, out var executingAssemblyLocation);
+            var settingsReader = new System.Configuration.AppSettingsReader();
+            var logLevelString = settingsReader.GetValue("LogLevel", typeof(string)).ToString();
+            if (Enum.TryParse(logLevelString, true, out SimpleLog.Severity logLevel))
+            {
+                SimpleLog.LogLevel = logLevel;
+            }
+
+            SimpleLog.Prefix = $"{fullName}.";
 
             SimpleLog.Prefix = $"{executingAssemblyFileName}.";
 
@@ -62,6 +70,7 @@
             catch (Exception ex)
             {
                 SimpleLog.Error("Starting target process threw an unknown Exception: " + ex);
+                SimpleLog.Log(ex);
                 return -7003;
             }
         }
