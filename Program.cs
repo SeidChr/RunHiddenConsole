@@ -1,6 +1,7 @@
 ﻿namespace PowerShellWindowHost
 {
     using System;
+    using System.Configuration;
     using System.Diagnostics;
     using System.IO;
     using System.Reflection;
@@ -69,11 +70,16 @@
 
         private static void Configure(string executingAssemblyFileName)
         {
-            var settingsReader = new System.Configuration.AppSettingsReader();
-            var logLevelString = settingsReader.GetValue("LogLevel", typeof(string)).ToString();
-            if (Enum.TryParse(logLevelString, true, out SimpleLog.Severity logLevel))
+            var logLevelString = ConfigurationManager.AppSettings["LogLevel"];
+
+            if (logLevelString != null 
+                && Enum.TryParse(logLevelString, true, out SimpleLog.Severity logLevel))
             {
                 SimpleLog.LogLevel = logLevel;
+            }
+            else 
+            {
+                SimpleLog.LogLevel = SimpleLog.Severity.Error;
             }
 
             SimpleLog.BackgroundTaskDisabled = true;
