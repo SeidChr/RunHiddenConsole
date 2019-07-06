@@ -16,3 +16,6 @@ as seen in app.config in the repository. Then just update the LogLevel app-setti
 Input stream from file and output stream to file, if requested.
     Please tell me how you would like to use this. It would probably require a config file alongside 
 	the assembly to configure which parameters define the inputs and outputs
+	
+# Keywords
+silent, script, hidden, console, window, command, commandline, hide
