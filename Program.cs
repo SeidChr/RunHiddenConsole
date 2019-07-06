@@ -8,6 +8,8 @@
 
     public static class Program
     {
+        private const string DoubleQuote = "\"";
+
         public static int Main()
         {
             Debugger.Launch();
@@ -87,18 +89,15 @@
 
         private static string GetArguments()
         {
-            var commandLineExecutable = Environment.GetCommandLineArgs()[0];
-            var commandLine = Environment.CommandLine;
+            var commandLineExecutable = Environment.GetCommandLineArgs()[0].Trim();
+            
+            var commandLine = Environment.CommandLine.Trim();
 
-            var arguments = commandLine
-                .Remove(
-                    commandLine.IndexOf(
-                        commandLineExecutable,
-                        StringComparison.InvariantCultureIgnoreCase),
-                    commandLineExecutable.Length)
-                .TrimStart('"', ' ');
+            var argsStartIndex = commandLineExecutable.Length + (commandLine.StartsWith(DoubleQuote) ? 3 : 1);
 
-            return arguments;
+            var args = commandLine.Substring(argsStartIndex);
+
+            return args;
         }
     }
 }
