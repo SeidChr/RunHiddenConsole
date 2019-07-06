@@ -8,34 +8,29 @@
 
     public static class Program
     {
-        public static int Main(string[] args)
+        private const string DoubleQuote = "\"";
+
+        public static int Main()
         {
-            var executingAssembly = Assembly.GetExecutingAssembly();
+            Debugger.Launch();
 
-            var fullName = Path.GetFileName(executingAssembly.Location);
+            var arguments = GetArguments();
 
-            var settingsReader = new System.Configuration.AppSettingsReader();
-            var logLevelString = settingsReader.GetValue("LogLevel", typeof(string)).ToString();
-            if (Enum.TryParse(logLevelString, true, out SimpleLog.Severity logLevel))
-            {
-                SimpleLog.LogLevel = logLevel;
-            }
+            GetAssemblyData(out var executingAssemblyLocation, out var executingAssemblyFileName);
 
-            SimpleLog.Prefix = $"{fullName}.";
+            Configure(executingAssemblyFileName);
 
-            SimpleLog.Info($"RunHiddenConsole Executing Assembly FullName: {fullName}");
+            SimpleLog.Info($"Full Commandline: {Environment.CommandLine}");
+            SimpleLog.Info($"Detected Attributes: {arguments}");
 
-            var match = Regex.Match(fullName, @"(.+)w(\.\w{1,3})");
-            if (!match.Success)
+            SimpleLog.Info($"RunHiddenConsole Executing Assembly FullName: {executingAssemblyFileName}");
+
+            var targetExecutablePath = GetTargetExecutablePath(executingAssemblyLocation, executingAssemblyFileName);
+            if (targetExecutablePath == null)
             {
                 SimpleLog.Error("Unable to find target executable name in own executable name.");
                 return -7001;
             }
-
-            var targetExecutableName = match.Groups[1].Value + match.Groups[2].Value;
-
-            var fullDirectory = Path.GetDirectoryName(executingAssembly.Location) ?? string.Empty;
-            var executable = Path.Combine(fullDirectory, targetExecutableName);
 
             var startInfo = new ProcessStartInfo
             {
@@ -44,8 +39,8 @@
                 RedirectStandardInput = true,
                 WindowStyle = ProcessWindowStyle.Hidden,
                 WorkingDirectory = Directory.GetCurrentDirectory(),
-                Arguments = string.Join(" ", args),
-                FileName = executable,
+                Arguments = arguments,
+                FileName = targetExecutablePath,
             };
 
             try
@@ -70,6 +65,62 @@
                 SimpleLog.Log(ex);
                 return -7003;
             }
+        }
+
+        private static void Configure(string executingAssemblyFileName)
+        {
+            var settingsReader = new System.Configuration.AppSettingsReader();
+            var logLevelString = settingsReader.GetValue("LogLevel", typeof(string)).ToString();
+            if (Enum.TryParse(logLevelString, true, out SimpleLog.Severity logLevel))
+            {
+                SimpleLog.LogLevel = logLevel;
+            }
+
+            SimpleLog.BackgroundTaskDisabled = true;
+            SimpleLog.Prefix = $"{executingAssemblyFileName}.";
+        }
+
+        private static void GetAssemblyData(out string assemblyLocation, out string assemblyFileName)
+        {
+            var executingAssembly = Assembly.GetExecutingAssembly();
+            assemblyFileName = Path.GetFileName(executingAssembly.Location);
+            assemblyLocation = Path.GetDirectoryName(executingAssembly.Location) ?? string.Empty;
+        }
+
+        private static string GetTargetExecutablePath(string executingAssemblyLocation, string executingAssemblyFileName)
+        {
+            var match = Regex.Match(executingAssemblyFileName, @"(.+)w(\.\w{1,3})");
+            if (!match.Success)
+            {
+                return null;
+            }
+
+            var targetExecutableName = match.Groups[1].Value + match.Groups[2].Value;
+            var targetExecutablePath = Path.Combine(executingAssemblyLocation, targetExecutableName);
+
+            return targetExecutablePath;
+        }
+
+        private static string GetArguments()
+        {
+            var commandLineExecutable = Environment
+                .GetCommandLineArgs()[0]
+                .Trim();
+            
+            var commandLine = Environment
+                .CommandLine
+                .Trim();
+
+            var argsStartIndex = commandLineExecutable.Length 
+                + (commandLine.StartsWith(DoubleQuote) 
+                    ? 2 
+                    : 0);
+
+            var args = commandLine
+                .Substring(argsStartIndex)
+                .Trim();
+
+            return args;
         }
     }
 }

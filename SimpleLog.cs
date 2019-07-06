@@ -384,6 +384,12 @@
         public static bool LoggingStarted => backgroundTask != null;
 
         /// <summary>
+        /// Gets or sets a value indicating whether background task logging is disabled, 
+        /// and thus immediate logging is executed.
+        /// </summary>
+        public static bool BackgroundTaskDisabled { get; set; } = false;
+
+        /// <summary>
         /// Set all log properties at once
         /// </summary>
         /// <remarks>
@@ -527,7 +533,7 @@
         /// <returns>Null on success or the <see cref="Exception"/> that occurred when processing the message, i.e. when enqueuing the message (when <paramref name="useBackgroundTask"/> is true) or when writing the message to disk (when <paramref name="useBackgroundTask"/> is false).</returns>
         public static Exception Info(string message, bool useBackgroundTask = true)
         {
-            return Log(message);
+            return Log(message, Severity.Info, useBackgroundTask);
         }
 
         /// <summary>
@@ -538,7 +544,7 @@
         /// <returns>Null on success or the <see cref="Exception"/> that occurred when processing the message, i.e. when enqueuing the message (when <paramref name="useBackgroundTask"/> is true) or when writing the message to disk (when <paramref name="useBackgroundTask"/> is false).</returns>
         public static Exception Warning(string message, bool useBackgroundTask = true)
         {
-            return Log(message, Severity.Warning);
+            return Log(message, Severity.Warning, useBackgroundTask);
         }
 
         /// <summary>
@@ -549,7 +555,7 @@
         /// <returns>Null on success or the <see cref="Exception"/> that occurred when processing the message, i.e. when enqueuing the message (when <paramref name="useBackgroundTask"/> is true) or when writing the message to disk (when <paramref name="useBackgroundTask"/> is false).</returns>
         public static Exception Error(string message, bool useBackgroundTask = true)
         {
-            return Log(message, Severity.Error);
+            return Log(message, Severity.Error, useBackgroundTask);
         }
 
         /// <summary>
@@ -713,7 +719,7 @@
                 logEntry.Add(new XAttribute("ThreadId", Thread.CurrentThread.ManagedThreadId));
                 logEntry.Add(xElement);
 
-                if (useBackgroundTask)
+                if (useBackgroundTask && !BackgroundTaskDisabled)
                 {
                     // Enqueue log entry to be written to the file by background task
                     Enqueue(logEntry);
