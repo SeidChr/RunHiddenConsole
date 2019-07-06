@@ -13,7 +13,7 @@
 
         public static int Main()
         {
-            Debugger.Launch();
+            ////Debugger.Launch();
 
             var arguments = GetArguments();
 
