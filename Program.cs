@@ -4,8 +4,10 @@
     using System.Configuration;
     using System.Diagnostics;
     using System.IO;
+    using System.Linq;
     using System.Reflection;
     using System.Text.RegularExpressions;
+    using PowerShellWindowHost.Extensions;
 
     public static class Program
     {
@@ -72,6 +74,12 @@
         {
             var logLevelString = ConfigurationManager.AppSettings["LogLevel"];
 
+            var logLocation = ConfigurationManager.AppSettings["LogLocation"];
+            if (logLocation != null)
+            {
+                SimpleLog.SetLogDir(logLocation, true);
+            }
+
             if (logLevelString != null 
                 && Enum.TryParse(logLevelString, true, out SimpleLog.Severity logLevel))
             {
@@ -102,7 +110,22 @@
             }
 
             var targetExecutableName = match.Groups[1].Value + match.Groups[2].Value;
-            var targetExecutablePath = Path.Combine(executingAssemblyLocation, targetExecutableName);
+
+            var envPaths = Environment.GetEnvironmentVariable("PATH")
+                .SplitExt(Path.PathSeparator);
+
+            var configPaths = ConfigurationManager.AppSettings["TargetExecutablePaths"]
+                .SplitExt(Path.PathSeparator);
+
+            // TODO: this is somewhat expensive. probably a good idea to cache the result.
+            var targetExecutablePath = configPaths
+                .AppendExt(executingAssemblyLocation)
+                .Concat(envPaths)
+                .NotNullOrWhitespaceExt()
+                .TrimExt()
+                .Select(p => Path.Combine(p, targetExecutableName))
+                .Where(File.Exists)
+                .FirstOrDefault();
 
             return targetExecutablePath;
         }

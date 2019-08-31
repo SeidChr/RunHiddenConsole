@@ -45,6 +45,8 @@
     <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Extensions\EnumerableExtensions.cs" />
+    <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="SimpleLog.cs" />
