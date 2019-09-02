@@ -117,15 +117,14 @@
             var configPaths = ConfigurationManager.AppSettings["TargetExecutablePaths"]
                 .SplitExt(Path.PathSeparator);
 
-            // TODO: this is somewhat expensive. probably a good idea to cache the result.
+            // TODO: this can be somewhat expensive in terms of file io. probably a good idea to cache the result for a few seconds.
             var targetExecutablePath = configPaths
                 .AppendExt(executingAssemblyLocation)
                 .Concat(envPaths)
                 .NotNullOrWhitespaceExt()
                 .TrimExt()
                 .Select(p => Path.Combine(p, targetExecutableName))
-                .Where(File.Exists)
-                .FirstOrDefault();
+                .FirstOrDefault(File.Exists);
 
             return targetExecutablePath;
         }
