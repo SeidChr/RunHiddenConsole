@@ -19,4 +19,4 @@ as seen in app.config in the repository. Then just update the LogLevel app-setti
 	Might be required by som orgs. But no complaints so far.
 	
 # Keywords
-silent, script, hidden, console, window, command, commandline, hide, pwsh, cmd, powershell, bash
+silent, script, hidden, console, window, command, commandline, hide, pwsh, cmd, powershell, bash, pwshw, cmdw, powershellw, exe
