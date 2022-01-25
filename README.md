@@ -13,9 +13,10 @@ debugging puropse. When there is a crash in the tool you should find a log-file 
 If you need to change the log level of the tool, you can add a "*w.exe.config", and with the default values 
 as seen in app.config in the repository. Then just update the LogLevel app-setting as you desire.
 ## Future Points
-Input stream from file and output stream to file, if requested.
-    Please tell me how you would like to use this. It would probably require a config file alongside 
-	the assembly to configure which parameters define the inputs and outputs
+- Input stream from file and output stream to file, if requested.
+	Please tell me how you would like to use this. It would probably require a config file alongside the assembly to configure which parameters define the inputs and outputs
+- Windows Eventlog logging.
+	Might be required by som orgs. But no complaints so far.
 	
 # Keywords
-silent, script, hidden, console, window, command, commandline, hide
+silent, script, hidden, console, window, command, commandline, hide, pwsh, cmd, powershell, bash
